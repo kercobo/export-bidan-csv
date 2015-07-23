@@ -1,11 +1,10 @@
 import urllib2, base64, json
 import socket
-import xlwt
-import json
 import inflection
 import sys
 from datetime import datetime 
 import csv
+import os
 
 # set timeout
 # timeout in seconds
@@ -15,6 +14,7 @@ socket.setdefaulttimeout(timeout)
 URL = "http://118.91.130.18:9979"
 USERLOGIN = "demo1"
 PASSWORDLOGIN = "1"
+csvPathFolder = "csv/"
 
 resultJson = ""
 formNames = {}
@@ -23,7 +23,7 @@ allUsers = ['user1', 'user2', 'user3', 'user4', 'user5', 'user6', 'user8', 'user
 
 # fetch forms
 for user in allUsers:
-	apiUrl = URL + "/form-submissions?anm-id="+user+"&timestamp=0&batch-size=100"
+	apiUrl = URL + "/form-submissions?anm-id="+user+"&timestamp=0&batch-size=10"
 	try:
 		print("Fetch form submissions %s" % user)
 		req = urllib2.Request(apiUrl)
@@ -31,9 +31,7 @@ for user in allUsers:
 		req.add_header("Authorization", "Basic %s" % base64String)
 		result = urllib2.urlopen(req)
 		resultJson = json.load(result.fp)
-		jsonData = json.loads(json.dumps(resultJson))
-
-		for row in jsonData:
+		for row in resultJson:
 			if not row["formName"] in formNames:
 				formNames[row["formName"]] = []
 			jsondata = (json.loads(row["formInstance"]))
@@ -82,7 +80,10 @@ for sheet in formNames:
 				aForm.append("-")
 		allForms.append(aForm)
 
-	with open(sheet+".csv", "wb") as csv_file:
+	if not os.path.exists(csvPathFolder):
+		os.makedirs(csvPathFolder)
+
+	with open(csvPathFolder+sheet+".csv", "wb") as csv_file:
 		writer = csv.writer(csv_file, delimiter=',')
 		for line in allForms:
 			writer.writerow(line)
