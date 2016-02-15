@@ -108,7 +108,7 @@ def create_csv():
 def start():
     while True:
             create_csv()
-            time.sleep(3600)
+            time.sleep(60)
 
 if __name__ == '__main__':
 	start()
